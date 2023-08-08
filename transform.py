@@ -25,9 +25,9 @@ def cornerPoints(points):
 
 def fourPointTransform(image, points):
 
-    # Initalize the Four Main Points in Order.
+    # Initialize the Four Main Points in Order.
     rect = cornerPoints(points)
-    # Seperate the order points into diff variables.
+    # Separate the order points into diff variables.
     (tl, tr, br, bl) = rect
 
     # Width is computed with points of bottom and top. Equaling the X coordinates
