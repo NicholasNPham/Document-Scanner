@@ -23,4 +23,37 @@ def cornerPoints(points):
     # Return Ordered Coordinates
     return rect
 
+def fourPointTransform(image, points):
 
+    # Initalize the Four Main Points in Order.
+    rect = cornerPoints(points)
+    # Seperate the order points into diff variables.
+    (tl, tr, br, bl) = rect
+
+    # Width is computed with points of bottom and top. Equaling the X coordinates
+    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - bl[1]) ** 2))
+    
+    # Finds the Max Width between the top points of bottom points
+    maxWidth = max(int(widthA), int(widthB))
+
+    # Height is computer with the points of left and right. Equaling to the Y coordinates.
+    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+
+    # Finds the max Height between the left and right points of square.
+    maxHeight = max(int(heightA), int(heightB))
+
+    # Goes TL, TR, BR, BL
+    distance = np.array([
+        [0, 0], 
+        [maxWidth - 1, 0],
+        [maxWidth - 1, maxHeight - 1],
+        [0, maxHeight - 1]], dtype='float32')
+    
+    # Initalize the Matrix then apply warped Perspective.
+    matrix = cv2.getPerspectiveTransform(rect, distance)
+    warped = cv2.warpPerspective(image, matrix, (maxWidth, maxHeight))
+
+    # return warped from function.
+    return warped
