@@ -1,6 +1,11 @@
 import numpy as np
 import cv2
 
+
+"""
+Identifies the Corners of the page/paper/document
+"""
+
 def cornerPoints(points):
 
     # TL -> TR -> BR -> BL
@@ -18,10 +23,14 @@ def cornerPoints(points):
     # Top Right = Smallest Diff
     rect[1] = points[np.argmin(diff)]
     # Bottom Left = Largest Diff
-    rect[2] = points[np.argmax(diff)]
+    rect[3] = points[np.argmax(diff)]
 
     # Return Ordered Coordinates
     return rect
+
+"""
+Transform the Original Page into a Full Page for Scanned Image
+"""
 
 def fourPointTransform(image, points):
 
@@ -32,7 +41,7 @@ def fourPointTransform(image, points):
 
     # Width is computed with points of bottom and top. Equaling the X coordinates
     widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - bl[1]) ** 2))
+    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
     
     # Finds the Max Width between the top points of bottom points
     maxWidth = max(int(widthA), int(widthB))
@@ -46,10 +55,10 @@ def fourPointTransform(image, points):
 
     # Goes TL, TR, BR, BL
     distance = np.array([
-        [0, 0], 
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]], dtype='float32')
+		[0, 0],
+		[maxWidth - 1, 0],
+		[maxWidth - 1, maxHeight - 1],
+		[0, maxHeight - 1]], dtype = "float32")
     
     # Initalize the Matrix then apply warped Perspective.
     matrix = cv2.getPerspectiveTransform(rect, distance)
