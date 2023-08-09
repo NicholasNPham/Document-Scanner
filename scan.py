@@ -1,9 +1,13 @@
 from transform import fourPointTransform
 from skimage.filters import threshold_local
 import numpy as np
-import argparse
 import cv2
 import imutils
+import os
+
+"""
+Step 1: Edge Detection
+"""
 
 # Finding file location.
 image = cv2.imread('image/image.png')
@@ -22,10 +26,14 @@ edged = cv2.Canny(gray, 75, 200)
 print('Step 1: Edge Detection')
 
 # CV2 DISPLAY
-cv2.imshow('Image', image)
-cv2.imshow("Edge", edged)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.imshow('Image', image)
+# cv2.imshow("Edge", edged)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+"""
+Step 2: Finding Contour of Paper
+"""
 
 # Finds the contours in the edged image
 # Keeps the largest one, and Initialize the screen contour.
@@ -46,7 +54,39 @@ for c in contours:
 
 # CV2 Showing Image with Contour
 print('Step 2: Finding Contour of Paper')
-cv2.drawContours(image, [screenContour], -1, (0, 255, 0), 2)
-cv2.imshow('Outline', image)
+# cv2.drawContours(image, [screenContour], -1, (0, 255, 0), 2)
+# cv2.imshow('Outline', image)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+"""
+Step 3: Apply Perspective Transform & Threshold
+"""
+
+# Apply the Four Point Transform to obtain Top-Down View
+warped = fourPointTransform(original, screenContour.reshape(4, 2) * ratio)
+
+# Converting the warped image to grayscale then threshold it
+warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+T = threshold_local(warped, 11, offset = 10, method = "gaussian")
+warped = (warped > T).astype("uint8") * 255
+
+# Show the original and scanned image
+print('Step 3: Applying Perspective Transform')
+cv2.imshow("Original", imutils.resize(original, height = 650))
+cv2.imshow("Scanned", imutils.resize(warped, height = 650))
+
 cv2.waitKey(0)
-cv2.destroyAllWindows()
+
+"""
+Saving Image to File
+"""
+# Destination File Directory
+directory = 'E:\Current Project\Document-Scanner\Scanned'
+
+# Changing Named Saved
+filename = 'ScannedImage.png'
+
+# Writing/Downloading the file into the directory with the changed filename.
+cv2.imwrite(os.path.join(directory, filename), warped)
+print('Imaged Saved')
